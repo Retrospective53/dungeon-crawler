@@ -501,6 +501,35 @@ function updateStats() {
 
   enemyStats.textContent = game.enemies.length;
 }
+
+
+// enemy combat
+
+function gameOver() {
+  alert('GAME OVER');
+  game.reset;
+  startGame();
+};
+
+function fightEnemy(enemy) {
+  if (player.health - enemy.damage <= 0) {
+    gameOver();
+    return;
+  }
+
+  if (enemy.health - player.weapon.damage <= 0) {
+    enemyDefeated();
+  }
+
+  else {
+    enemy.health -= player.weapon.damage
+  }
+  player.health -= enemy.damage;
+  updateStats();
+
+}
+
+
 init();
 
 
