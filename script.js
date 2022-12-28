@@ -453,7 +453,18 @@ function addKeyboardListener() {
         return; // exit this handler for other keys
     }
 
-    if (game.map[y][x] != WALL_CODE) {
+    if (game.map[y][x] == ENEMY_CODE) {
+       
+      const matching_coords = (enemy) => {
+          return enemy.coords.x == x && enemy.coords.y == y;
+      }
+      let enemy = game.enemies.find(matching_coords);
+
+      // new
+      fightEnemy(enemy);
+    }
+
+    else if (game.map[y][x] != WALL_CODE) {
       updatePlayerPosition(player.coords.x, player.coords.y, x, y);
 
       let left = oldX - VISIBILITY - 1;
@@ -526,10 +537,49 @@ function fightEnemy(enemy) {
   }
   player.health -= enemy.damage;
   updateStats();
-
 }
 
+// enemy defeated
 
+function enemyDefeated(enemy) {
+
+  // remove enemy from  2D array
+  removeObjFromMap(enemy.coords.x, enemy.coords.y);
+  
+  // set up the draw parameters for readability.
+  let left = enemy.coords.x - 1;
+  let top = enemy.coords.y - 1
+  let right = enemy.coords.x + 1;
+  let bot = enemy.coords.y + 1;
+  
+  // remove ane enemy from the visible map.
+  drawMap(left, top, right, bot);
+
+  // add experience points
+  player.xp += parseInt((enemy.damage + enemy.health)/2);
+
+  // calculate the level in points. Level 1 has no experience so machine-wise it is level 0.
+  let level_in_points = POINTS_PER_LEVEL * (player.level - 1)
+
+  // level up if needed.
+  if (player.xp - level_in_points >= POINTS_PER_LEVEL) {
+     player.level++;
+  }
+
+  // remove enemy from enemies array
+  let e_idx = game.enemies.indexOf(enemy);
+
+  // remove enemy from array
+  game.enemies.splice(e_idx, 1);
+
+  // update stats
+  updateStats();
+
+  // if no enemies, user wins
+  if (game.enemies.length == 0) {
+     userWins();
+  }
+}
 init();
 
 
