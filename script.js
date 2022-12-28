@@ -216,7 +216,7 @@ function init() {
 function startGame() {
   generateMap();
 
-  setTimeout(gameSetUp, 1000);
+  setTimeout(gameSetUp, 1500);
 
   function gameSetUp() {
 
@@ -335,9 +335,9 @@ function drawMap(startX, startY, endX, endY) {
   ];
 
   // loop through all cells of the map
-  for (var row = startY; row < endY; row++) {
+  for (let row = startY; row < endY; row++) {
 
-     for (var col = startX; col < endX; col++) {
+     for (let col = startX; col < endX; col++) {
 
         let c_idx = game.map[row][col];
 
@@ -431,55 +431,69 @@ function updatePlayerPosition(oldX, oldY, newX, newY) {
 
 function addKeyboardListener() {
   document.addEventListener('keydown', function(e) {
-    let x = player.coords.x;
-    let y = player.coords.y;
-    let oldX = player.coords.x;
-    let oldY = player.coords.y;
+     var x = player.coords.x;
+     var y = player.coords.y;
+     var oldX = player.coords.x;
+     var oldY = player.coords.y;
 
-    switch (e.which) {
-      case 37: // left
-      x--;
-      break;
-      case 38: // up
-      y--;
-      break;
-      case 39: // right
-      x++;
-      break;
-      case 40: // down
-      y++;
-      break;
-      default:
-        return; // exit this handler for other keys
-    }
+     switch (e.which) {
+        case 37: // left
+           x--;
+           break;
+        case 38: // up
+           y--;
+           break;
+        case 39: // right
+           x++;
+           break;
+        case 40: // down
+           y++;
+           break;
+        default:
+           return; // exit this handler for other keys
+     }
+     // check if next spot is enemy
+     if (game.map[y][x] == ENEMY_CODE) {
 
-    if (game.map[y][x] == ENEMY_CODE) {
-       
-      const matching_coords = (enemy) => {
-          return enemy.coords.x == x && enemy.coords.y == y;
-      }
-      let enemy = game.enemies.find(matching_coords);
+        const matching_coords = (enemy) => {
+           return enemy.coords.x == x && enemy.coords.y == y;
+        }
+        let enemy = game.enemies.find(matching_coords);
 
-      // new
-      fightEnemy(enemy);
-    }
+        fightEnemy(enemy);
+     } 
+     else if (game.map[y][x] != WALL_CODE) {
+        // if next spot is potion
+        if (game.map[y][x] == POTION_CODE) {
 
-    else if (game.map[y][x] != WALL_CODE) {
-      updatePlayerPosition(player.coords.x, player.coords.y, x, y);
+           player.health += pickRandom(POTIONS);
 
-      let left = oldX - VISIBILITY - 1;
-      let top = oldY - VISIBILITY - 1;
-            
-      let right = x + VISIBILITY + 2;
-      let bot = y + VISIBILITY + 2 ;
+           removeObjFromMap(x, y);
+           generateItems(1, POTION_CODE);
+        // if next spot is weapon
+        } else if (game.map[y][x] == WEAPON_CODE) {
 
-      drawMap(left, top, right, bot);
+           player.weapon = pickRandom(WEAPONS);
 
-    }
-    e.preventDefault();
-  })
+           removeObjFromMap(x, y);
+           generateItems(1, WEAPON_CODE);
+        }
+        // update player position
+        updatePlayerPosition(player.coords.x, player.coords.y, x, y);
+
+        updateStats();
+
+        let left = oldX - VISIBILITY - 1;
+        let top = oldY - VISIBILITY - 1;
+
+        let right = x + VISIBILITY + 2;
+        let bot = y + VISIBILITY + 2 ;
+
+        drawMap(left, top, right, bot);
+     }
+     e.preventDefault(); // prevent the default action (scroll / move caret)
+  });
 }
-
 
 // upddating game stats
 function updateStats() {
@@ -529,7 +543,7 @@ function fightEnemy(enemy) {
   }
 
   if (enemy.health - player.weapon.damage <= 0) {
-    enemyDefeated();
+    enemyDefeated(enemy);
   }
 
   else {
@@ -580,6 +594,13 @@ function enemyDefeated(enemy) {
      userWins();
   }
 }
+
+function userWins() {
+  alert("YOU CONQUERED THE DUNGEON!");
+  game.reset();
+  startGame();
+};
+
 init();
 
 
