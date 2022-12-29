@@ -175,6 +175,7 @@ function createDOM() {
 
   function toggleShadow() {
   game.isShadowToggled = !game.isShadowToggled;
+  drawMap(0, 0, COLS, ROWS);
   }
 
   btn.addEventListener('click', toggleShadow);
@@ -221,11 +222,12 @@ function startGame() {
   function gameSetUp() {
 
     generatePlayer();
-    generateEnemies(TOTAL_ENEMIES);
-
+    generateShadow();
+    
     generateItems(STARTING_POTIONS_AMOUNT, POTION_CODE);
     generateItems(STARTING_WEAPONS_AMOUNG, WEAPON_CODE);
-
+    generateEnemies(TOTAL_ENEMIES);
+    
     drawMap(0, 0, COLS, ROWS);
 
     updateStats();
@@ -317,32 +319,45 @@ function drawObject(x, y, color) {
 }
 
 // draw object
+// function drawMap(startX, startY, endX, endY) {
+
+//   // loop through all cells of the map
+//   for (let row = startY; row < endY; row++) {
+//      for (let col = startX; col < endX; col++) {
+//         color = null;
+
+//         // if shadow is on and the shadow is down
+//         if (game.isShadowToggled && game.shadow[row][col] == SHADOW_CODE) {
+//           // draw blck
+//           color = 'black';
+//         }
+//         else {
+//           let c_idx = game.map[row][col];
+//           let color = TILE_COLORS[c_idx];
+//           drawObject(col, row, color);
+//         }
+//      } // end loop
+//   }
+// }
 function drawMap(startX, startY, endX, endY) {
 
-  let colors = [
-     // wall
-     'grey',
-     // floor
-     'white',
-     // player
-     'blue',
-     // enemy
-     'red',
-     // health drop
-     'green',
-     // weapon
-     'orange'
-  ];
-
   // loop through all cells of the map
-  for (let row = startY; row < endY; row++) {
+  for (var row = startY; row < endY; row++) {
 
-     for (let col = startX; col < endX; col++) {
+     for (var col = startX; col < endX; col++) {
 
-        let c_idx = game.map[row][col];
+        let color = null;
 
-        let color = colors[c_idx];
-        
+        // if shadow is on and the shadow is down....
+        if (game.isShadowToggled && game.shadow[row][col] == SHADOW_CODE) {
+           // simply draw black.
+           color = 'black';
+           
+        } else {
+           let c_idx = game.map[row][col];
+
+           color = TILE_COLORS[c_idx];
+        }
         drawObject(col, row, color);
 
      } // end loop
@@ -406,9 +421,12 @@ function generateItems(quantity, tileCode) {
     let coords = generateValidCoords();
     addObjToMap(coords, tileCode);
 
-    let color = TILE_COLORS[tileCode];
-
-    drawObject(coords.x, coords.y, color);
+    if (!game.isShadowToggled ||
+      game.shadow[coords.y][coords.x] == VISIBLE_CODE) {
+        let color = TILE_COLORS[tileCode];
+    
+        drawObject(coords.x, coords.y, color);
+      }
   }
 }
 
@@ -421,12 +439,57 @@ function removeObjFromMap (x, y) {
 function updatePlayerPosition(oldX, oldY, newX, newY) {
   removeObjFromMap(oldX, oldY);
 
+  // set this as teh player
   game.map[newY][newX] = PLAYER_CODE;
 
   player.coords = {
     x: newX,
     y: newY
-  }
+  };
+  let start = {}, end = {};
+
+   // if player is going right and down
+   let old_left = oldX - VISIBILITY;  
+   let old_top = oldY - VISIBILITY;
+
+   start.x = old_left < 0 ? 0 : old_left;
+   start.y = old_top < 0 ? 0 : old_top;
+
+   let new_right = newX + VISIBILITY;
+   let new_bot = newY + VISIBILITY;
+
+   end.x = new_right >= COLS ? COLS - 1 : new_right;
+   end.y = new_bot >= ROWS ? ROWS - 1 : new_bot;
+
+   // if player is moving left
+   if (oldX > newX) {
+     
+      start.x = newX - VISIBILITY;
+
+      end.x = oldX + VISIBILITY;
+   }
+   // if player is moving up
+   if (oldY > newY) {
+     
+      start.y = newY - VISIBILITY;
+
+      end.y = oldY + VISIBILITY;
+   }
+
+   for (var row = start.y; row <= end.y; row++) {
+      for (var col = start.x; col <= end.x; col++) {
+         if (row >= newY - VISIBILITY &&
+            row <= newY + VISIBILITY &&
+            col >= newX - VISIBILITY &&
+            col <= newX + VISIBILITY) {
+            // show tiles
+            game.shadow[row][col] = VISIBLE_CODE;
+         } else {
+            // hide tiles
+            game.shadow[row][col] = SHADOW_CODE;
+         }
+      }
+   }
 }
 
 function addKeyboardListener() {
@@ -532,7 +595,7 @@ function updateStats() {
 
 function gameOver() {
   alert('GAME OVER');
-  game.reset;
+  game.reset();
   startGame();
 };
 
@@ -601,6 +664,58 @@ function userWins() {
   startGame();
 };
 
+
+/**
+ * Generates a shadow in the 2D array based on the player's position.
+ */
+function generateShadow() {
+   
+  let start = {}, end = {};
+
+  let left_edge = player.coords.x - VISIBILITY;
+  let top_edge = player.coords.y - VISIBILITY;
+
+  start.x = left_edge < 0 ? 0 : left_edge;
+  start.y = top_edge < 0 ? 0 : top_edge;
+
+  let right_edge = player.coords.x + VISIBILITY;
+  let bot_edge = player.coords.y + VISIBILITY;
+
+  end.x = right_edge  >= COLS ? COLS - 1 : right_edge;
+  end.y = bot_edge >= ROWS ? ROWS - 1 : bot_edge;
+
+  // iterate through all squares on the map
+  for (var row = 0; row < ROWS; row++) {
+     game.shadow.push([]);
+     for (var col = 0; col < COLS; col++) {
+        
+        // if this falls within visible region, push 1
+        if (row >= start.y && row <= end.y && col >= start.x && col <= end.x) {
+           
+           game.shadow[row].push(VISIBLE_CODE);
+           
+        // else, push 0
+        } else {
+           game.shadow[row].push(SHADOW_CODE);
+        }
+     }
+  }
+}
+
+
+
+
 init();
 
-
+function searchUndefined() {
+  for (let i = 0; i < game.map.length; i++) {
+    for (let j = 0; j < game.map[i].length; j++) {
+      if (game.map[i][j] === undefined) {
+        return console.log(`Found an undefined value at index [${i}, ${j}]`);
+      }
+      else {
+        return 'no undefined';
+      }
+    }
+  }  
+}
