@@ -190,7 +190,8 @@ function addStat(label, container) {
   let el = document.createElement('li');
   let id = label.toLowerCase();
   let value = '0';
-  el.innerHTML = `<label>${label}</label>: <span id="${id}" ${value}></span>`;
+  // el.innerHTML = `<label>${label}</label>: <span id="${id}" ${value}></span>`;
+  el.innerHTML = `<label>${label}</label>: <span id="${id}"></span>`;
   container.appendChild(el);
   return container;
 }
@@ -217,7 +218,7 @@ function init() {
 function startGame() {
   generateMap();
 
-  setTimeout(gameSetUp, 1500);
+  setTimeout(gameSetUp, 1000);
 
   function gameSetUp() {
 
