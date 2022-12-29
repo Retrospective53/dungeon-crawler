@@ -1,3 +1,5 @@
+import "./styles/style.css"
+
 /**
  * Creates a new player. 
  * @class
@@ -319,34 +321,11 @@ function drawObject(x, y, color) {
   game.context.fill();
 }
 
-// draw object
-// function drawMap(startX, startY, endX, endY) {
-
-//   // loop through all cells of the map
-//   for (let row = startY; row < endY; row++) {
-//      for (let col = startX; col < endX; col++) {
-//         color = null;
-
-//         // if shadow is on and the shadow is down
-//         if (game.isShadowToggled && game.shadow[row][col] == SHADOW_CODE) {
-//           // draw blck
-//           color = 'black';
-//         }
-//         else {
-//           let c_idx = game.map[row][col];
-//           let color = TILE_COLORS[c_idx];
-//           drawObject(col, row, color);
-//         }
-//      } // end loop
-//   }
-// }
 function drawMap(startX, startY, endX, endY) {
 
   // loop through all cells of the map
   for (var row = startY; row < endY; row++) {
-
      for (var col = startX; col < endX; col++) {
-
         let color = null;
 
         // if shadow is on and the shadow is down....
@@ -702,9 +681,6 @@ function generateShadow() {
      }
   }
 }
-
-
-
 
 init();
 

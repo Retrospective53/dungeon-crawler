@@ -1,0 +1,30 @@
+{
+  "name": "dungeon-crawler",
+  "version": "1.0.0",
+  "description": "A dungeon crawler game made with javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Retrospective53/dungeon-crawler.git"
+  },
+  "keywords": [
+    "javascript",
+    "dungeon-crawler",
+    "game"
+  ],
+  "author": "Retrospective53",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Retrospective53/dungeon-crawler/issues"
+  },
+  "homepage": "https://github.com/Retrospective53/dungeon-crawler#readme",
+  "devDependencies": {
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}
