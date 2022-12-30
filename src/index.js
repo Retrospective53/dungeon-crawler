@@ -258,6 +258,7 @@ function generateMap() {
  * @param {Number} y
  * @param {String} color
  */ 
+
 function drawObject(x, y, color) {
   game.context.beginPath();
   game.context.rect(x * TILE_DIM, y * TILE_DIM, TILE_DIM, TILE_DIM);
